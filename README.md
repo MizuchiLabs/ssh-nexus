@@ -1,8 +1,14 @@
+<p align="center">
 <img src="./web/src/lib/assets/logo.png" width="80">
+<br><br>
+<img alt="GitHub Tag" src="https://img.shields.io/github/v/tag/MizuchiLabs/ssh-nexus?label=Version">
+<img alt="GitHub License" src="https://img.shields.io/github/license/MizuchiLabs/ssh-nexus">
+<img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/MizuchiLabs/ssh-nexus">
+</p>
 
 # SSH Nexus
 
-Welcome to **SSH Nexus**, your one-stop solution for managing SSH access with ease and security. This application combines a powerful backend using Pocketbase & Go with a sleek and responsive frontend built with Sveltekit, delivering a user-friendly experience for both administrators and users.
+Your one-stop solution for managing SSH access with ease and security. This application combines a powerful backend using Pocketbase & Go with a sleek and responsive frontend built with Sveltekit, delivering a user-friendly experience for both administrators and users.
 
 ## Features
 
@@ -86,7 +92,7 @@ Welcome to **SSH Nexus**, your one-stop solution for managing SSH access with ea
 
 ### Admin Panel
 
-The admin panel will be available at [http://localhost:8090/\_/](http://localhost:8090/_/) which uses pocketbase as the backend. You will rarely need to interact with it since everything can be done via the frontend and env variables. Be careful though when interacting with the generated collections!
+The admin panel will be available at [http://localhost:8090/\_/](http://localhost:8090/_/) which uses pocketbase as the backend. You will rarely need to interact with it since everything can be done via the frontend. Be careful though when interacting with the generated collections!
 
 ### User Access
 
@@ -116,10 +122,6 @@ We welcome contributions to improve SSH Nexus. To get started, fork the reposito
    git push origin feature-name
    ```
 1. **Open a pull request**
-
-## License
-
-SSH Nexus is released under the Apache 2.0 License. See the [LICENSE](LICENSE) file for more details.
 
 # Default Project Environment Variables
 
@@ -167,3 +169,11 @@ export PB_REPO_TOKEN=""
 - Better user views
 - Better error/debug views
 - Fix realtime subscriptions
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues, fork the repository, and create pull requests.
+
+## License
+
+SSH Nexus is released under the Apache 2.0 License. See the [LICENSE](LICENSE) file for more details.
