@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@font-face {
+    font-family: 'Geist';
+    src: url('/fonts/GeistVF.woff2') format("woff2-variations");
+    font-weight: 125 950;
+    font-stretch: 75% 125%;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Geist Mono';
+    src: url('/fonts/GeistMonoVF.woff2') format("woff2-variations");
+    font-weight: 125 950;
+    font-stretch: 75% 125%;
+    font-style: normal;
+}
+
+html,
+body {
+  @apply h-full overflow-hidden;
+}

@@ -1,0 +1,73 @@
+version: 2
+project_name: ssh-nexus
+dist: builds
+
+before:
+  hooks:
+    - go fmt ./...
+    - go vet ./...
+    - go mod tidy
+    - go mod verify
+    - cd web && pnpm install && pnpm run build
+
+builds:
+  - id: server
+    main: ./cmd/server
+    binary: nexus
+    ldflags: -s -w -X github.com/MizuchiLabs/ssh-nexus/tools/config.Version={{.Version}} -X github.com/MizuchiLabs/ssh-nexus/tools/config.Commit={{.Commit}} -X github.com/MizuchiLabs/ssh-nexus/tools/config.BuildDate={{.Date}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      # - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm
+      - goos: darwin
+        goarch: arm
+
+  - id: agent
+    main: ./cmd/agent
+    binary: nexus-agent
+    ldflags: -s -w -X github.com/MizuchiLabs/ssh-nexus/tools/config.Version={{.Version}} -X github.com/MizuchiLabs/ssh-nexus/tools/config.Commit={{.Commit}} -X github.com/MizuchiLabs/ssh-nexus/tools/config.BuildDate={{.Date}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+upx:
+  - enabled: true
+
+release:
+  draft: true
+  mode: replace
+
+gitea_urls:
+  api: https://gitea.vougee.space/api/v1
+
+archives:
+  - format: binary
+    name_template: >-
+      {{ .Binary }}_{{ .Os }}_{{ .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: '{{ incpatch .Version }}-next'
+
+report_sizes: true
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^web:'

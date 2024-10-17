@@ -1,0 +1,14 @@
+# Example docker-compose.yml file for ssh-nexus server
+services:
+  ssh-nexus:
+    image: ghcr.io/mizuchilabs/ssh-nexus:latest
+    container_name: ssh-nexus
+    environment:
+      - PB_ADMIN_PASSWORD=<secret>
+      - PB_ENCRYPTION_KEY=<secret> # generate a secret with openssl rand -hex 32
+    volumes:
+      - ./pb_data:/app/pb_data # Database
+    ports:
+      - 8090:8090
+      - 8091:8091
+    restart: unless-stopped

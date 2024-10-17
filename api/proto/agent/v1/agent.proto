@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package agent.v1;
+
+service AgentService {
+  rpc Stream(stream StreamRequest) returns (stream StreamResponse) {}
+}
+
+// Backend data relevant to the agent
+message StreamResponse {
+  optional bytes ssh_config = 1;
+  optional bytes user_certificate_public_key = 2;
+  optional bytes host_certificate_public_key = 3;
+  optional bool restore = 4;
+  repeated Principal principals = 5;
+
+  message Principal {
+    string key = 1;
+    repeated string values = 2;
+  }
+}
+
+// Information about the agent
+message StreamRequest {
+  optional string version = 1;
+  optional string public_host_key = 2;
+}
