@@ -1,13 +1,19 @@
 <script lang="ts">
+	import type { AuthProviderInfo } from "pocketbase";
+	import * as Tabs from "$lib/components/ui/tabs/index.js";
+	import * as Card from "$lib/components/ui/card/index.js";
+	import { Button } from "$lib/components/ui/button/index.js";
+	import { Input } from "$lib/components/ui/input/index.js";
+	import { Label } from "$lib/components/ui/label/index.js";
 	import { goto } from "$app/navigation";
 	import { loggedIn, pb } from "$lib/client";
-	import { showToast } from "$lib/utils/Toast";
-	import { getToastStore } from "@skeletonlabs/skeleton";
-	import type { AuthProviderInfo } from "pocketbase";
+	import { toast } from "svelte-sonner";
+	import { Eye, EyeOff } from "lucide-svelte";
 	import { onMount } from "svelte";
 
-	const toastStore = getToastStore();
 	let username: string, password: string;
+	let showPassword = false;
+
 	const loginPassword = async () => {
 		const admin = await pb.admins
 			.authWithPassword(username, password)
@@ -18,34 +24,32 @@
 				.authWithPassword(username, password)
 				.catch(() => false);
 			if (!user) {
-				showToast(toastStore, "Invalid username or password", "error");
+				toast.error("Invalid username or password");
 				return;
 			}
 		}
-		showToast(toastStore, "Login successful");
+		toast.success("Login successful");
 		loggedIn.set(true);
-		goto("/");
+		goto("/machines"); // TODO: Redirect to dashboard
 	};
 	const resetPassword = async () => {
 		if (!username) return;
 		try {
 			await pb.collection("users").requestPasswordReset(username);
-			showToast(toastStore, "Password reset email sent!");
+			toast.success("Password reset email sent!");
 		} catch (err) {
-			showToast(toastStore, "Not a valid email address!", "error");
+			toast.error("Failed to send password reset email");
 		}
 	};
 
 	let oauthProviders: AuthProviderInfo[] = [];
 	const loginOauth = async (provider: AuthProviderInfo) => {
 		try {
-			await pb
-				.collection("users")
-				.authWithOAuth2({ provider: provider.name });
-			showToast(toastStore, "Login successful");
+			await pb.collection("users").authWithOAuth2({ provider: provider.name });
+			toast.success("Login successful");
 			goto("/");
 		} catch (err) {
-			showToast(toastStore, "Login failed", "error");
+			toast.error("Login failed");
 		}
 	};
 
@@ -61,68 +65,91 @@
 				.listAuthMethods({ requestKey: null });
 			oauthProviders = result.authProviders;
 		} catch (err) {
-			console.error("Failed to load oauth providers", err);
+			toast.error("Failed to load oauth providers");
 		}
 	});
 </script>
 
-<div class="container flex flex-col gap-4 mx-auto">
-	<div
-		class="card lg:w-1/2 lg:self-center lg:mx-auto flex flex-col p-4 mt-8 gap-4"
-		on:keydown={onKeys}
-		aria-hidden
-	>
-		<h2 class="flex flex-col">
-			<span class="text-2xl font-bold">Login</span>
-			<p class="text-sm text-surface-300">
-				Enter either your username or email to login
-			</p>
-		</h2>
-		<label class="label flex flex-col gap-2">
-			<span class="font-bold">Username</span>
-			<input
-				class="input variant-form-material"
-				type="text"
-				name="username"
-				bind:value={username}
-			/>
-		</label>
-		<label class="label flex flex-col gap-2">
-			<span class="font-bold flex flex-row justify-between">
-				Password
-				<button
-					class="text-sm text-surface-300 ml-2"
-					on:click={resetPassword}
-					tabindex="-1"
-				>
-					Forgot your password?
-				</button>
-			</span>
-			<input
-				class="input variant-form-material"
-				type="password"
-				name="password"
-				bind:value={password}
-			/>
-		</label>
-		<button class="btn variant-filled-success" on:click={loginPassword}
-			>Login</button
-		>
-		{#if oauthProviders.length > 0}
-			<div class="flex flex-col gap-2">
-				{#each oauthProviders as provider}
-					<button
-						class="btn variant-filled-surface"
-						on:click={() => loginOauth(provider)}
+{#if !$loggedIn}
+	<Tabs.Root value="username" class="w-[400px]">
+		<Tabs.List class="grid w-full grid-cols-2">
+			<Tabs.Trigger value="username">Username</Tabs.Trigger>
+			<Tabs.Trigger value="oauth">OAuth</Tabs.Trigger>
+		</Tabs.List>
+		<Tabs.Content value="username">
+			<Card.Root class="w-[400px]">
+				<Card.Header>
+					<Card.Title>Login</Card.Title>
+					<Card.Description>Login to your account</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<div
+						class="grid w-full items-center gap-4"
+						on:keydown={onKeys}
+						aria-hidden
 					>
-						{#if provider.displayName}
-							{provider.displayName}
-						{:else}
-							{provider.name}
-						{/if}
-					</button>
-				{/each}
-			</div>
-		{/if}
-	</div>
-</div>
+						<div class="flex flex-col space-y-1.5">
+							<Label for="username">Username</Label>
+							<Input id="username" bind:value={username} />
+						</div>
+						<div class="flex flex-col space-y-1.5">
+							<Label for="password">
+								<span class="flex flex-row justify-between">
+									Password
+									<button on:click={resetPassword} aria-hidden>
+										Forgot your password?
+									</button>
+								</span>
+							</Label>
+							<div class="flex flex-row items-center justify-end gap-1">
+								{#if showPassword}
+									<Input id="password" type="text" bind:value={password} />
+								{:else}
+									<Input id="password" type="password" bind:value={password} />
+								{/if}
+								<Button
+									variant="ghost"
+									size="icon"
+									class="absolute hover:bg-transparent hover:text-red-400"
+									on:click={() => (showPassword = !showPassword)}
+								>
+									{#if showPassword}
+										<Eye size="1rem" />
+									{:else}
+										<EyeOff size="1rem" />
+									{/if}
+								</Button>
+							</div>
+						</div>
+					</div>
+					<div class="mt-4 flex flex-col">
+						<Button type="submit" on:click={loginPassword}>Login</Button>
+					</div>
+				</Card.Content>
+			</Card.Root>
+		</Tabs.Content>
+		<Tabs.Content value="oauth">
+			<Card.Root class="w-[400px]">
+				<Card.Header>
+					<Card.Title>Login</Card.Title>
+					<Card.Description>Login using an OAuth provider</Card.Description>
+				</Card.Header>
+				<Card.Content class="flex flex-col items-center gap-4">
+					{#if oauthProviders.length === 0}
+						<p class="text-sm">No OAuth providers configured</p>
+					{:else}
+						{#each oauthProviders as provider}
+							<Button
+								variant="default"
+								class="w-full"
+								on:click={() => loginOauth(provider)}
+							>
+								{provider.name}
+							</Button>
+						{/each}
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		</Tabs.Content>
+	</Tabs.Root>
+{/if}

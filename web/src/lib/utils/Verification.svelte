@@ -1,26 +1,24 @@
 <script lang="ts">
     import { pb, user } from "$lib/client";
-    import { showToast } from "$lib/utils/Toast";
-    import { getToastStore } from "@skeletonlabs/skeleton";
+    import { toast } from "svelte-sonner";
 
-    const toastStore = getToastStore();
     const verifyEmail = async () => {
         await pb
             .collection("users")
             .requestVerification(pb.authStore.model?.email);
-        showToast(toastStore, `Email sent 👌`, "success");
+        toast.success("Verification email sent");
     };
 </script>
 
 {#if $user?.verified === false}
     <div
-        class="flex items-center justify-center w-full p-2 bg-primary-400 dark:bg-surface-700"
+        class="flex items-center justify-center w-full p-2 bg-red-300 dark:bg-red-400"
     >
-        <span class="flex items-center text-sm font-normal dark:text-gray-400"
+        <span class="flex items-center text-sm font-normal dark:text-black"
             >You are not verified yet,
             <p
                 on:click={verifyEmail}
-                class="font-medium text-success-500 dark:text-primary-300 hover:text-success-300 cursor-pointer px-1"
+                class="font-medium text-purple-500 dark:text-purple-700 cursor-pointer px-1"
                 aria-hidden
             >
                 click here

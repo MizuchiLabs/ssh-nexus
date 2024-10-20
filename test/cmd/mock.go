@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	numRecords  = 50
+	numRecords  = 25
 	collections = []string{
 		"groups",
 		"permissions",
@@ -87,7 +87,7 @@ func generateMockData(
 			record.Set("agent", gofakeit.Bool())
 			record.Set("error", gofakeit.Error())
 		case "groups":
-			record.Set("name", gofakeit.Name())
+			record.Set("name", gofakeit.JobLevel()+gofakeit.UUID()[:8])
 			record.Set("description", gofakeit.Sentence(10))
 			record.Set("linux_username", gofakeit.Username())
 		case "tags":

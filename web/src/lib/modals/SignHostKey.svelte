@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { pb } from "$lib/client";
-	import { clipboard, getModalStore } from "@skeletonlabs/skeleton";
-	import type { SvelteComponent } from "svelte";
+	import * as Dialog from "$lib/components/ui/dialog/index.js";
+	import { Button } from "$lib/components/ui/button/index.js";
+	import { Input } from "$lib/components/ui/input/index.js";
+	import { Label } from "$lib/components/ui/label/index.js";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import { Copy } from "lucide-svelte";
 
-	export let parent: SvelteComponent;
-
-	const modalStore = getModalStore();
+	export let open = false;
 
 	let hostname = "";
 	let publicKey = "";
@@ -36,9 +38,6 @@
 				publicKey = "";
 			}
 		}
-		if (e.key === "Escape") {
-			modalStore.close();
-		}
 	};
 	const selectText = (e: any) => {
 		e.target.select();
@@ -46,76 +45,74 @@
 	};
 </script>
 
-{#if $modalStore[0]}
-	<div class="container flex flex-col mx-auto p-4 gap-4 lg:w-2/3 xl:w-1/2">
-		<div class="card">
-			{#if signedCertificate}
-				<header class="card-header text-2xl font-bold">
-					Signed Host Certificate
-				</header>
-				<section class="flex flex-col p-4 gap-4">
-					<code class="code text-wrap">
-						Warning! You will not be able to access this information
-						later, so please copy the information below!
-					</code>
-					<textarea
-						class="textarea"
-						rows="11"
-						on:click={selectText}
-						bind:value={signedCertificate}
-						data-clipboard="signedCertificate"
-						readonly
+<Dialog.Root bind:open>
+	<Dialog.Content>
+		<Dialog.Header>
+			<Dialog.Title>
+				{#if signedCertificate}
+					Signed Certificate
+				{:else}
+					Sign Key
+				{/if}
+			</Dialog.Title>
+			<Dialog.Description>
+				{#if signedCertificate}
+					You will not be able to access this information later, so please copy
+					the information below!
+				{:else}
+					Get a new host certificate by signing your public key.
+				{/if}
+			</Dialog.Description>
+		</Dialog.Header>
+		{#if signedCertificate}
+			<Textarea
+				rows={10}
+				bind:value={signedCertificate}
+				on:click={selectText}
+				readonly
+			/>
+
+			<div class="flex flex-row items-center justify-between gap-4">
+				<span class="text-sm ml-2">Expiry: {expiryDate}</span>
+
+				<Button
+					variant="ghost"
+					size="icon"
+					class="h-8 hover:bg-transparent hover:text-red-400"
+					on:click={() => navigator.clipboard.writeText(signedCertificate)}
+				>
+					<Copy size="1rem" />
+				</Button>
+			</div>
+		{:else}
+			<div class="flex flex-col gap-4" on:keydown={onKeys} aria-hidden>
+				<div class="flex flex-row items-center gap-4">
+					<Label for="hostname" class="text-right min-w-[80px]">Hostname</Label>
+					<Input
+						id="hostname"
+						class="col-span-3"
+						bind:value={hostname}
+						placeholder="localhost (optional)"
 					/>
-					<span class="text-sm ml-2">Expiry: {expiryDate}</span>
-					<button
-						class="btn variant-filled-success ml-2"
-						use:clipboard={{ input: "signedCertificate" }}
-						on:click={parent.onClose()}
-						value="signedCertificate"
-						>Copy
-					</button>
-				</section>
-			{:else}
-				<header class="card-header text-2xl font-bold">
-					Get a new host certificate
-				</header>
-				<section class="flex flex-col gap-4 p-4">
-					<label class="label" on:keydown={onKeys} aria-hidden>
-						<span>Public Key</span>
-						<input
-							class="input variant-form-material"
-							type="text"
-							bind:value={publicKey}
-							placeholder="ssh-ed25519 ..."
-							class:input-success={validKey}
-							class:input-error={!validKey && publicKey !== ""}
-						/>
-					</label>
-					<label class="label" on:keydown={onKeys} aria-hidden>
-						<span> Hostname </span>
-						<span class="text-sm text-surface-300 ml-1"
-							>(Optional)</span
-						>
-						<input
-							class="input variant-form-material"
-							type="text"
-							bind:value={hostname}
-							placeholder="localhost"
-						/>
-					</label>
-					<p
-						class="text-sm text-error-500 mt-2"
-						class:hidden={!signFail}
-					>
-						Failed to sign key, make sure you have entered a valid
-						public key!
+				</div>
+
+				<div class="flex flex-row items-center gap-4">
+					<Label for="publickey" class="text-right min-w-[80px]">
+						Public Key
+					</Label>
+					<Input
+						id="publickey"
+						class="col-span-3"
+						bind:value={publicKey}
+						placeholder="ssh-ed25519 ..."
+					/>
+				</div>
+				{#if signFail}
+					<p class="text-xs text-red-400 text-right">
+						Failed to sign key, make sure you have entered a valid public key!
 					</p>
-					<p class="text-sm text-surface-400">
-						Example of a valid public key format: <br />
-						<code>ssh-ed25519 AAAAB3Nza... username@hostname</code>
-					</p>
-				</section>
-			{/if}
-		</div>
-	</div>
-{/if}
+				{/if}
+			</div>
+		{/if}
+	</Dialog.Content>
+</Dialog.Root>

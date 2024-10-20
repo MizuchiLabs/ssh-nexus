@@ -5,7 +5,7 @@ import { get } from "svelte/store";
 export async function generateConfig() {
   if (!pb.authStore.model) return;
 
-  let userKeyName = pb.authStore.model.settings?.ssh_key_name;
+  const userKeyName = pb.authStore.model.settings?.ssh_key_name;
 
   // Base SSH config
   let sshConfig = `Host *\n`;

@@ -1,46 +1,41 @@
 <script lang="ts">
-	import { clipboard, getModalStore } from "@skeletonlabs/skeleton";
-	import { onMount, type SvelteComponent } from "svelte";
+	import { onMount } from "svelte";
 	import { generateConfig } from "$lib/utils/SSHConfig";
+	import * as Dialog from "$lib/components/ui/dialog/index.js";
+	import { Button } from "$lib/components/ui/button/index.js";
+	import { Textarea } from "$lib/components/ui/textarea";
 
-	export let parent: SvelteComponent;
-
-	const modalStore = getModalStore();
+	export let open = false;
 
 	let sshConfig = "";
-	const onKeys = (e: KeyboardEvent) => {
-		if (e.key === "Escape") {
-			modalStore.close();
-		}
+	const selectText = (e: any) => {
+		e.target.select();
+		navigator.clipboard.writeText(e.target.value);
 	};
 	onMount(async () => {
 		sshConfig = (await generateConfig()) || "";
 	});
 </script>
 
-{#if $modalStore[0]}
-	<div class="card p-4 w-modal shadow-xl space-y-4">
-		<div on:keydown={onKeys} aria-hidden class="flex flex-col gap-4">
-			<textarea
-				class="textarea"
-				rows={sshConfig.split("\n").length}
-				value={sshConfig}
-				on:click={(event) => event.target.select()}
-				data-clipboard="sshConfig"
-				readonly
-			/>
-		</div>
-		<footer class="modal-footer {parent.regionFooter}">
-			<button
-				class="btn variant-filled-success"
-				use:clipboard={{ input: "sshConfig" }}
-				on:click={parent.onClose}
-				value="sshConfig"
-				>Copy
-			</button>
-			<button class="btn variant-filled-surface" on:click={parent.onClose}
-				>Close</button
-			>
-		</footer>
-	</div>
-{/if}
+<Dialog.Root bind:open>
+	<Dialog.Content class="no-scrollbar max-h-[80vh] overflow-y-auto">
+		<Dialog.Header>
+			<Dialog.Title>SSH Config</Dialog.Title>
+			<Dialog.Description>This is your current ssh config.</Dialog.Description>
+		</Dialog.Header>
+
+		<Textarea
+			class="textarea"
+			rows={sshConfig.split("\n").length}
+			bind:value={sshConfig}
+			on:click={selectText}
+			data-clipboard="sshConfig"
+			readonly
+		/>
+
+		<Button
+			class="w-full"
+			on:click={() => navigator.clipboard.writeText(sshConfig)}>Copy</Button
+		>
+	</Dialog.Content>
+</Dialog.Root>

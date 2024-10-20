@@ -6,12 +6,12 @@ export interface Route {
 }
 
 export const baseRoutes: Route[] = [
-  {
-    name: "Home",
-    path: "/",
-    icon: "fa6-solid:house",
-    admin: false,
-  },
+  // {
+  //   name: "Home",
+  //   path: "/",
+  //   icon: "fa6-solid:house",
+  //   admin: false,
+  // },
   {
     name: "Machines",
     path: "/machines",
@@ -25,7 +25,13 @@ export const baseRoutes: Route[] = [
     admin: true,
   },
   {
-    name: "System",
+    name: "Groups",
+    path: "/groups",
+    icon: "fa6-solid:users",
+    admin: false,
+  },
+  {
+    name: "Settings",
     path: "/settings/general",
     icon: "fa6-solid:gear",
     admin: true,

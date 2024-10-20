@@ -1,25 +1,18 @@
 <script lang="ts">
+    import * as Card from "$lib/components/ui/card/index.js";
+    import { Switch } from "$lib/components/ui/switch/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
     import { pb } from "$lib/client";
     import { settings } from "$lib/subscriptions";
-    import { showToast } from "$lib/utils/Toast";
-    import { SlideToggle, getToastStore } from "@skeletonlabs/skeleton";
     import type { RecordModel, ClientResponseError } from "pocketbase";
+    import { toast } from "svelte-sonner";
 
-    const toastStore = getToastStore();
     const updateSettings = async (setting: RecordModel) => {
         try {
             await pb.collection("settings").update(setting.id, setting);
-            showToast(
-                toastStore,
-                `Updated ${setting.key} to ${setting.value}`,
-                "success",
-            );
+            toast.success(`Updated ${setting.key} to ${setting.value}`);
         } catch (error: ClientResponseError | any) {
-            showToast(
-                toastStore,
-                error.data?.message || "Something went wrong.",
-                "error",
-            );
+            toast.error(error.data?.message || "Something went wrong.");
         }
     };
 
@@ -85,124 +78,124 @@
     }
 </script>
 
-<div class="card flex flex-col gap-4 w-full">
-    <header class="card-header text-2xl font-bold">Settings</header>
-    <section class="p-4">
-        <ul class="flex flex-col gap-6 list">
-            {#each $settings as setting}
-                {#if setting.key === "default_retention"}
-                    <li on:keydown={(e) => onKeys(e, setting)} aria-hidden>
-                        <iconify-icon icon="fa6-solid:clock-rotate-left" />
-                        <span class="flex-auto">
-                            <dt class="font-bold">
-                                Default Audit Log Retention
-                                <span class="text-surface-400 ml-2"
-                                    >{formatDuration(setting.value)}</span
-                                >
-                            </dt>
-                            <dd class="text-sm dark:text-surface-300">
-                                Set the default audit log retention (in seconds)
-                            </dd>
+<div class="flex flex-col gap-2">
+    {#each $settings as setting}
+        {#if setting.key === "default_retention"}
+            <Card.Root>
+                <Card.Header>
+                    <Card.Title>
+                        Default Audit Log Retention
+                        <span class="text-gray-400/75 ml-2 text-sm">
+                            {formatDuration(setting.value)}
                         </span>
-                        <input
-                            class="input variant-form-material w-1/3"
-                            type="text"
-                            bind:value={setting.value}
-                            placeholder={setting.value}
-                        />
-                    </li>
-                {/if}
-                {#if setting.key === "user_lease"}
-                    <li on:keydown={(e) => onKeys(e, setting)} aria-hidden>
-                        <iconify-icon icon="fa6-solid:hourglass-half" />
-                        <span class="flex-auto">
-                            <dt class="font-bold">
-                                Default TTL of new user ssh certificates
-                                <span class="text-surface-400 ml-2"
-                                    >{formatDuration(setting.value)}</span
-                                >
-                            </dt>
-                            <dd class="text-sm dark:text-surface-300">
-                                Set the default TTL of new user ssh certificates
-                                (in seconds)
-                            </dd>
+                    </Card.Title>
+                    <Card.Description>
+                        Set the default audit log retention (in seconds)
+                    </Card.Description>
+                </Card.Header>
+                <Card.Content>
+                    <Input
+                        type="text"
+                        bind:value={setting.value}
+                        placeholder={setting.value}
+                        on:keydown={(e) => onKeys(e, setting)}
+                    />
+                </Card.Content>
+            </Card.Root>
+        {/if}
+        {#if setting.key === "user_lease"}
+            <Card.Root>
+                <Card.Header>
+                    <Card.Title>
+                        Default TTL of new user ssh certificates
+                        <span class="text-gray-400/75 ml-2 text-sm">
+                            {formatDuration(setting.value)}
                         </span>
-                        <input
-                            class="input variant-form-material w-1/3"
-                            type="text"
-                            bind:value={setting.value}
-                            placeholder={setting.value}
-                        />
-                    </li>
-                {/if}
-                {#if setting.key === "max_lease"}
-                    <li on:keydown={(e) => onKeys(e, setting)} aria-hidden>
-                        <iconify-icon icon="fa6-solid:hourglass-end" />
-                        <span class="flex-auto">
-                            <dt class="font-bold">
-                                Max TTL of new user ssh certificates
-                                <span class="text-surface-400 ml-2"
-                                    >{formatDuration(setting.value)}</span
-                                >
-                            </dt>
-                            <dd class="text-sm dark:text-surface-300">
-                                Set the maximum TTL of new user ssh certificates
-                                (in seconds)
-                            </dd>
+                    </Card.Title>
+                    <Card.Description>
+                        Set the default TTL of new user ssh certificates (in
+                        seconds)
+                    </Card.Description>
+                </Card.Header>
+                <Card.Content>
+                    <Input
+                        type="text"
+                        bind:value={setting.value}
+                        placeholder={setting.value}
+                        on:keydown={(e) => onKeys(e, setting)}
+                    />
+                </Card.Content>
+            </Card.Root>
+        {/if}
+        {#if setting.key === "max_lease"}
+            <Card.Root>
+                <Card.Header>
+                    <Card.Title>
+                        Max TTL of new user ssh certificates
+                        <span class="text-gray-400/75 ml-2 text-sm">
+                            {formatDuration(setting.value)}
                         </span>
-                        <input
-                            class="input variant-form-material w-1/3"
-                            type="text"
-                            bind:value={setting.value}
-                            placeholder={setting.value}
-                        />
-                    </li>
-                {/if}
-                {#if setting.key === "host_lease"}
-                    <li on:keydown={(e) => onKeys(e, setting)} aria-hidden>
-                        <iconify-icon icon="fa6-solid:hourglass-start" />
-                        <span class="flex-auto">
-                            <dt class="font-bold">
-                                Max TTL of new host ssh certificates
-                                <span class="text-surface-400 ml-2"
-                                    >{formatDuration(setting.value)}</span
-                                >
-                            </dt>
-                            <dd class="text-sm dark:text-surface-300">
-                                Set the maximum TTL of new host ssh certificates
-                                (in seconds)
-                            </dd>
+                    </Card.Title>
+                    <Card.Description>
+                        Set the maximum TTL of new user ssh certificates (in
+                        seconds)
+                    </Card.Description>
+                </Card.Header>
+                <Card.Content>
+                    <Input
+                        type="text"
+                        bind:value={setting.value}
+                        placeholder={setting.value}
+                        on:keydown={(e) => onKeys(e, setting)}
+                    />
+                </Card.Content>
+            </Card.Root>
+        {/if}
+        {#if setting.key === "host_lease"}
+            <Card.Root>
+                <Card.Header>
+                    <Card.Title>
+                        Max TTL of new host ssh certificates
+                        <span class="text-gray-400/75 ml-2 text-sm">
+                            {formatDuration(setting.value)}
                         </span>
-                        <input
-                            class="input variant-form-material w-1/3"
-                            type="text"
-                            bind:value={setting.value}
-                            placeholder={setting.value}
-                        />
-                    </li>
-                {/if}
-                {#if setting.key === "install_agent"}
-                    <li>
-                        <iconify-icon icon="fa6-solid:robot" />
-                        <span class="flex-auto">
-                            <dt class="font-bold">
-                                Install Agents on new machines
-                            </dt>
-                            <dd class="text-sm dark:text-surface-300">
-                                Check if agents should be installed per default
-                                on newly created machines
-                            </dd>
-                        </span>
-                        <SlideToggle
-                            name="toggleAgents"
-                            checked={setting.value === "true"}
-                            active="bg-primary-600 dark:bg-primary-400"
-                            size="sm"
-                            on:change={() => changeBool(setting)}
-                        />
-                    </li>
-                {/if}
-            {/each}
-        </ul>
-    </section>
+                    </Card.Title>
+                    <Card.Description>
+                        Set the maximum TTL of new host ssh certificates (in
+                        seconds)
+                    </Card.Description>
+                </Card.Header>
+                <Card.Content>
+                    <Input
+                        type="text"
+                        bind:value={setting.value}
+                        placeholder={setting.value}
+                        on:keydown={(e) => onKeys(e, setting)}
+                    />
+                </Card.Content>
+            </Card.Root>
+        {/if}
+        {#if setting.key === "install_agent"}
+            <Card.Root>
+                <Card.Content
+                    class="flex flex-row justify-between items-center"
+                >
+                    <div>
+                        <h2 class="text-lg font-semibold">
+                            Install Agents on new machines
+                        </h2>
+                        <p class="text-gray-400/75 text-sm">
+                            Check if agents should be installed per default on
+                            newly created machines
+                        </p>
+                    </div>
+                    <Switch
+                        id="toggleAgents"
+                        checked={setting.value === "true"}
+                        onCheckedChange={(_) => changeBool(setting)}
+                    />
+                </Card.Content>
+            </Card.Root>
+        {/if}
+    {/each}
 </div>

@@ -1,16 +1,20 @@
 <script lang="ts">
     import { pb } from "$lib/client";
     import { settings } from "$lib/subscriptions";
-    import {
-        clipboard,
-        getModalStore,
-        type ModalSettings,
-    } from "@skeletonlabs/skeleton";
+    import * as Card from "$lib/components/ui/card/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
+    import { Button } from "$lib/components/ui/button/index.js";
+    import { Textarea } from "$lib/components/ui/textarea/index.js";
+    import SignHostKey from "$lib/modals/SignHostKey.svelte";
+    import UpdateUserCa from "$lib/modals/UpdateUserCA.svelte";
     import { onMount } from "svelte";
+    import { Copy } from "lucide-svelte";
 
     let userKey = "";
     let hostKey = "";
     let agentToken = "";
+    let openHostKey = false;
+    let openUserCA = false;
 
     const rotateToken = async () => {
         await pb.send("/api/rpc/token/rotate", { method: "POST" });
@@ -22,36 +26,6 @@
         await pb.send("/api/sync/token", { method: "POST" });
     };
 
-    const modals = getModalStore();
-    const updateKey = async () => {
-        const modal: ModalSettings = {
-            type: "component",
-            title: "Update User CA",
-            component: "UpdateUserCA",
-        };
-        modals.trigger(modal);
-    };
-    const signHostKey = () => {
-        const modal: ModalSettings = {
-            type: "component",
-            title: "Sign Host Key",
-            component: "SignHostKey",
-        };
-        modals.trigger(modal);
-    };
-
-    let icons = [
-        "fa6-solid:clipboard",
-        "fa6-solid:clipboard",
-        "fa6-solid:clipboard",
-        "fa6-solid:clipboard",
-    ];
-    const copyToClipboard = (index: number) => {
-        icons[index] = "fa6-solid:thumbs-up";
-        setTimeout(() => {
-            icons[index] = "fa6-solid:clipboard";
-        }, 2000);
-    };
     const selectText = (e: any) => {
         e.target.select();
         navigator.clipboard.writeText(e.target.value);
@@ -71,154 +45,184 @@
     });
 </script>
 
+<SignHostKey bind:open={openHostKey} />
+<UpdateUserCa bind:open={openUserCA} />
+
 <div class="flex flex-col gap-4 w-full">
-    <div class="card">
-        <header class="card-header text-2xl font-bold flex items-center">
-            Agent Token
-            <button
-                class="btn btn-sm variant-filled-surface ml-2"
-                on:click={rotateToken}>Rotate Token</button
-            >
-            <button
-                class="btn btn-sm variant-filled-surface ml-2"
-                on:click={syncToken}>Sync Token</button
-            >
-        </header>
-        <section class="px-4 py-2">
-            <span class="text-sm dark:text-surface-300">
-                This is current agent token, use it to register new agents.
-                <br />
-                <span class="font-bold underline"
-                    >In case of an emergency (leaked key) you can rotate the
-                    token and generate a new one. Keep in mind that this will
-                    disconnect all current agents! Using the 'Sync Token' button
-                    you can send the new token to all agents. Do so only after
-                    removing the compromised machines!
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="flex items-center gap-4">
+                Agent Token
+                <div>
+                    <Button
+                        variant="default"
+                        class="h-8 rounded-full"
+                        on:click={rotateToken}
+                    >
+                        Rotate Token
+                    </Button>
+                    <Button
+                        variant="default"
+                        class="h-8 rounded-full"
+                        on:click={syncToken}
+                    >
+                        Sync Token
+                    </Button>
+                </div>
+            </Card.Title>
+            <Card.Description>
+                <span class="text-sm dark:text-surface-300">
+                    This is current agent token, use it to register new agents.
+                    <br />
+                    <span class="font-bold underline"
+                        >In case of an emergency you can rotate the token and
+                        generate a new one. Keep in mind that this will
+                        disconnect all current agents! Using the 'Sync Token'
+                        button you can send the new token to all agents. Do so
+                        only after removing the compromised machines!
+                    </span>
                 </span>
-            </span>
-        </section>
-        <section class="flex flex-row items-center p-4">
-            <input
-                class="input"
+            </Card.Description>
+        </Card.Header>
+        <Card.Content class="flex flex-row items-center justify-end gap-1">
+            <Input
                 type="text"
                 bind:value={agentToken}
-                data-clipboard="agentToken"
                 on:click={selectText}
+                class="pr-10"
                 readonly
             />
-            <button
-                class="btn variant-filled-surface ml-2"
-                use:clipboard={{ input: "agentToken" }}
-                on:click={() => copyToClipboard(0)}
-                value="agentToken"
+            <Button
+                variant="ghost"
+                size="icon"
+                class="h-8 rounded-full absolute hover:bg-transparent hover:text-red-400"
+                on:click={() => navigator.clipboard.writeText(agentToken)}
             >
-                <iconify-icon icon={icons[0]} />
-            </button>
-        </section>
-    </div>
+                <Copy size="1rem" />
+            </Button>
+        </Card.Content>
+    </Card.Root>
 
-    <div class="card">
-        <header class="card-header text-2xl font-bold">
-            User CA Public Key
-            <button
-                class="btn btn-sm variant-filled-surface ml-2"
-                on:click={updateKey}>Overwrite Key</button
-            >
-        </header>
-        <section class="px-4 py-2">
-            <span class="text-sm dark:text-surface-300">
-                This is the public key of our user certificate authority and
-                will be automatically installed on the servers.
-                <br />
-                <span class="font-bold underline"
-                    >This key will also be used by the server to login, update
-                    machines manually and for installing agents on new machines.</span
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="flex items-center gap-4">
+                User CA Public Key
+
+                <Button
+                    variant="default"
+                    class="h-8 rounded-full"
+                    on:click={() => (openUserCA = true)}
                 >
-            </span>
-        </section>
-        <section class="flex flex-row items-center p-4">
-            <input
-                class="input"
+                    Overwrite Key
+                </Button>
+            </Card.Title>
+            <Card.Description>
+                <span class="text-sm dark:text-surface-300">
+                    This is the public key of our user certificate authority and
+                    will be automatically installed on the servers.
+                    <br />
+                    <span class="font-bold underline"
+                        >This key will also be used by the server to login,
+                        update machines manually and for installing agents on
+                        new machines.</span
+                    >
+                </span>
+            </Card.Description>
+        </Card.Header>
+        <Card.Content class="flex flex-row items-center justify-end gap-1">
+            <Input
                 type="text"
                 bind:value={userKey}
                 on:click={selectText}
-                data-clipboard="userKey"
+                class="pr-10"
                 readonly
             />
-            <button
-                class="btn variant-filled-surface ml-2"
-                use:clipboard={{ input: "userKey" }}
-                on:click={() => copyToClipboard(1)}
-                value="serverKey"
+            <Button
+                variant="ghost"
+                size="icon"
+                class="h-8 rounded-full absolute hover:bg-transparent hover:text-red-400"
+                on:click={() => navigator.clipboard.writeText(userKey)}
             >
-                <iconify-icon icon={icons[1]} />
-            </button>
-        </section>
-    </div>
+                <Copy size="1rem" />
+            </Button>
+        </Card.Content>
+    </Card.Root>
 
-    <div class="card">
-        <header class="card-header text-2xl font-bold">
-            Host CA Public Key
-            <button
-                class="btn btn-sm variant-filled-surface ml-2"
-                on:click={signHostKey}>Sign Host Key</button
-            >
-        </header>
-        <section class="px-4 py-2">
-            <span class="text-sm dark:text-surface-300">
-                This is the public key of our host certificate authority.
-                <br />
-                Put this into your
-                <span class="font-bold underline">known_hosts</span> file to automatically
-                trust the servers.
-            </span>
-        </section>
-        <section class="flex flex-row items-center p-4">
-            <input
-                class="input"
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="flex items-center gap-4">
+                Host CA Public Key
+
+                <Button
+                    variant="default"
+                    class="h-8 rounded-full"
+                    on:click={() => (openHostKey = true)}
+                >
+                    Sign Host Key
+                </Button>
+            </Card.Title>
+            <Card.Description>
+                <span class="text-sm dark:text-surface-300">
+                    This is the public key of our host certificate authority.
+                    <br />
+                    Put this into your
+                    <span class="font-bold underline">known_hosts</span> file to
+                    automatically trust the servers.
+                </span>
+            </Card.Description>
+        </Card.Header>
+        <Card.Content class="flex flex-row items-center justify-end gap-1">
+            <Input
                 type="text"
                 bind:value={hostKey}
                 on:click={selectText}
-                data-clipboard="hostKey"
+                class="pr-10"
                 readonly
             />
-            <button
-                class="btn variant-filled-surface ml-2"
-                use:clipboard={{ input: "hostKey" }}
-                on:click={() => copyToClipboard(2)}
-                value="serverKey"
+            <Button
+                variant="ghost"
+                size="icon"
+                class="h-8 rounded-full absolute hover:bg-transparent hover:text-red-400"
+                on:click={() => navigator.clipboard.writeText(hostKey)}
             >
-                <iconify-icon icon={icons[2]} />
-            </button>
-        </section>
-    </div>
+                <Copy size="1rem" />
+            </Button>
+        </Card.Content>
+    </Card.Root>
 
-    <div class="card">
-        <header class="card-header text-2xl font-bold">OpenSSH Config</header>
-        <section class="px-4 py-2">
-            <span class="text-sm dark:text-surface-300">
-                This is the custom OpenSSH server configuration file that will
-                be installed on the machines.
-            </span>
-        </section>
-        <section class="flex flex-row items-center p-4">
+    <Card.Root>
+        <Card.Header>
+            <Card.Title class="flex items-center gap-4">
+                OpenSSH Config
+            </Card.Title>
+            <Card.Description>
+                <span class="text-sm dark:text-surface-300">
+                    This is the custom OpenSSH server configuration file that
+                    will be installed on the machines.
+                </span>
+            </Card.Description>
+        </Card.Header>
+        <Card.Content class="flex flex-row items-center justify-end gap-1">
             {#each $settings as setting}
                 {#if setting.key === "ssh_config"}
-                    <textarea
+                    <Textarea
                         class="textarea"
                         rows={setting.value.split("\n").length}
                         bind:value={setting.value}
                         data-clipboard="sshConfig"
                     />
-                    <button
-                        class="btn variant-filled-surface ml-2"
-                        use:clipboard={{ input: "sshConfig" }}
-                        on:click={() => copyToClipboard(3)}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        class="h-8 rounded-full absolute hover:bg-transparent hover:text-red-400"
+                        on:click={() =>
+                            navigator.clipboard.writeText(setting.value)}
                         value="sshConfig"
-                        ><iconify-icon icon={icons[3]} />
-                    </button>
+                    >
+                        <Copy size="1rem" />
+                    </Button>
                 {/if}
             {/each}
-        </section>
-    </div>
+        </Card.Content>
+    </Card.Root>
 </div>
