@@ -53,10 +53,14 @@ Your one-stop solution for managing SSH access with ease and security. This appl
    Or use the install script:
    ```bash
    # For the latest server release
-   curl -sSL https://github.com/MizuchiLabs/ssh-nexus/raw/branch/main/install.sh | bash
+   curl -sSL https://raw.githubusercontent.com/MizuchiLabs/ssh-nexus/refs/heads/main/install.sh | bash
 
    # For the agent
-   curl -sSL https://github.com/MizuchiLabs/ssh-nexus/raw/branch/main/install.sh | bash -s agent
+   curl -sSL https://raw.githubusercontent.com/MizuchiLabs/ssh-nexus/refs/heads/main/install.sh | bash -s agent
+   ```
+   To uninstall:
+   ```bash
+   curl -sSL https://raw.githubusercontent.com/MizuchiLabs/ssh-nexus/refs/heads/main/uninstall.sh | bash -s uninstall
    ```
 1. **Environment variables**: Before starting you will need to set at least the following 2 environment variables:
    - **PB_ADMIN_PASSWORD**: The password for the admin user.

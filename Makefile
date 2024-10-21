@@ -66,7 +66,7 @@ test:
 
 .PHONY: release
 release:
-	goreleaser release --clean
+	goreleaser release --clean --skip=validate
 
 .PHONY: test-db
 test-db:

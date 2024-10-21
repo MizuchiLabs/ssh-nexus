@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-REPO="https://github.com/api/v1/repos/mizuchilabs/ssh-nexus/releases"
+REPO="https://api.github.com/repos/mizuchilabs/ssh-nexus/releases"
 
 # Downloads the latest release and moves it into ~/.local/bin
 main() {
@@ -26,8 +26,6 @@ main() {
 		exit 1
 	fi
 
-	url="https://github.com/mizuchilabs/ssh-nexus/releases/download/${latest}/${binary}_${platform}_${arch}"
-
 	case "$platform-$arch" in
 	macos-arm64* | linux-arm64* | linux-armhf | linux-aarch64)
 		arch="arm64"
@@ -41,23 +39,28 @@ main() {
 		;;
 	esac
 
+	url="https://github.com/mizuchilabs/ssh-nexus/releases/download/${latest}/${binary}_${platform}_${arch}"
+
 	echo "Downloading $binary from $url"
 	if which curl >/dev/null 2>&1; then
-		curl() {
-			command curl -fL "$@" -o "$temp"
-		}
+		command curl -sfL "$url" -o "$temp"
 	elif which wget >/dev/null 2>&1; then
-		curl() {
-			command wget -O- "$@" >"$temp"
-		}
+		command wget -O "$temp" "$url"
 	else
 		echo "Could not find 'curl' or 'wget' in your path"
 		exit 1
 	fi
 
+	# Ensure the file is not empty
+	if [ ! -s "$temp" ]; then
+		echo "Failed to download $binary, file is empty"
+		exit 1
+	fi
+
+	# Ensure the file is executable
 	"$platform" "$@"
 
-	if [ "$(which $binary)" = "$HOME/.local/bin/$binary" ]; then
+	if echo "$PATH" | grep -q "$HOME/.local/bin"; then
 		echo "$binary has been installed. Run with '$binary'."
 	else
 		echo "To run $binary from your terminal, you must add ~/.local/bin to your PATH"
