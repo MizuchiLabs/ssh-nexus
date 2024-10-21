@@ -39,7 +39,11 @@ proto:
 	cd api/proto && buf generate && buf lint
 
 .PHONY: docker
-docker:	build
+docker:
+	cd web && pnpm install && pnpm run build
+	go run test/cmd/mock.go # generate mock data
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o nexus-linux-amd64 cmd/server/main.go
+	GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o nexus-linux-arm64 cmd/server/main.go
 	docker build \
 		--label "org.opencontainers.image.source=https://github.com/MizuchiLabs/ssh-nexus" \
 		--label "org.opencontainers.image.description=SSH Nexus" \
@@ -48,7 +52,7 @@ docker:	build
 		--label "org.opencontainers.image.created=$(shell date -u +'%Y-%m-%dT%H:%M:%SZ')" \
 		--label "org.opencontainers.image.licenses=Apache-2.0" \
 		-t ghcr.io/mizuchilabs/ssh-nexus:latest .
-	rm $(BIN) $(BIN)-agent
+	rm nexus-linux-amd64 nexus-linux-arm64
 
 .PHONY: upgrade
 upgrade:

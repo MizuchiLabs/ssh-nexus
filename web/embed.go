@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-//go:embed build/*
+//go:embed all:build
 var build embed.FS
 var Static fs.FS
 

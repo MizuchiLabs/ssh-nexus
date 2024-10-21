@@ -3,7 +3,7 @@ FROM gcr.io/distroless/base-debian12:debug
 ARG TARGETOS
 ARG TARGETARCH
 
-COPY nexus /usr/local/bin/nexus
+COPY nexus-$TARGETOS-$TARGETARCH /usr/local/bin/nexus
 
 EXPOSE 8090
 EXPOSE 8091

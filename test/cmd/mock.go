@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"syscall"
 	"time"
 
 	_ "github.com/MizuchiLabs/ssh-nexus/internal/migrations"
@@ -214,6 +215,11 @@ func setupAdminAccount(app *pocketbase.PocketBase) error {
 }
 
 func main() {
+	err := os.RemoveAll("./test_pb_data")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	app := pocketbase.NewWithConfig(pocketbase.Config{
 		DefaultDataDir: "./test_pb_data",
 	})
@@ -233,6 +239,11 @@ func main() {
 			log.Fatal(err)
 		}
 		return setupAdminAccount(app)
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+		return nil
 	})
 
 	os.Args = append(os.Args, "serve")
