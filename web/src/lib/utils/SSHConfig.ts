@@ -1,9 +1,11 @@
 import { pb } from "$lib/client";
-import { machines } from "$lib/subscriptions";
+import { groups } from "$lib/subscriptions";
 import { get } from "svelte/store";
 
 export async function generateConfig() {
   if (!pb.authStore.model) return;
+  const request = await pb.send("/api/self/machines", { method: "GET" });
+  if (!request.machines.length) return;
 
   const userKeyName = pb.authStore.model.settings?.ssh_key_name;
 
@@ -21,9 +23,10 @@ export async function generateConfig() {
     sshConfig += `    IdentityFile ~/.ssh/id_rsa\n\n`;
   }
 
-  for (const machine of get(machines)) {
-    if (!machine.expand?.groups) continue;
-    for (const group of machine.expand.groups) {
+  for (const machine of request.machines) {
+    for (const id of machine.groups) {
+      let group = get(groups).find((group) => group.id === id);
+      if (!group) continue;
       if (group.linux_username === "root") {
         sshConfig += `Host ${machine.name}\n`;
       } else {

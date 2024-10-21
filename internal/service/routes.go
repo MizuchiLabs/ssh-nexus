@@ -81,6 +81,7 @@ func getVersion(c echo.Context) error {
 func getUserMachines(c echo.Context, app core.App) error {
 	admin := apis.RequestInfo(c).Admin
 	user := apis.RequestInfo(c).AuthRecord
+	fmt.Printf("user: %v\n", user)
 
 	var machines []Machine
 

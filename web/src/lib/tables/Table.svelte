@@ -26,6 +26,7 @@
     import * as Select from "$lib/components/ui/select";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import { Button } from "$lib/components/ui/button";
+    import { Badge } from "$lib/components/ui/badge";
     import { Input } from "$lib/components/ui/input";
     import { ArrowDown, ArrowUp, ChevronDown } from "lucide-svelte";
     import TablePermissions from "$lib/tables/permissions.svelte";
@@ -38,10 +39,13 @@
     import TableAccess from "$lib/tables/access.svelte";
     import TableLog from "$lib/tables/log.svelte";
     import { onMount } from "svelte";
-    import { writable } from "svelte/store";
+    import { writable, type Writable } from "svelte/store";
     import type { RecordModel } from "pocketbase";
+    import { LIMIT_SK } from "$lib/store";
 
     export let collection: string;
+    let groupFilter: Writable<RecordModel[]> = writable([]);
+    let tagFilter: Writable<RecordModel[]> = writable([]);
 
     const plugins = {
         page: addPagination(),
@@ -113,15 +117,22 @@
             accessor: "groups",
             header: "Groups",
             cell: ({ value }) => {
-                return createRender(TableGroups, { id: value });
+                return createRender(TableGroups, {
+                    id: value,
+                    selected: groupFilter,
+                });
             },
             plugins: {
                 sort: {
                     disable: true,
                 },
                 colFilter: {
-                    fn: ({ filterValue, value }): boolean => {
-                        return value ? value.includes(filterValue) : false;
+                    fn: ({ filterValue, value }) => {
+                        if (!filterValue || filterValue.length === 0)
+                            return true; // No filter, show all
+                        return filterValue.some((id: string) =>
+                            value.includes(id),
+                        );
                     },
                 },
             },
@@ -130,11 +141,23 @@
             accessor: "tags",
             header: "Tags",
             cell: ({ value }) => {
-                return createRender(TableTags, { id: value });
+                return createRender(TableTags, {
+                    id: value,
+                    selected: tagFilter,
+                });
             },
             plugins: {
                 sort: {
                     disable: true,
+                },
+                colFilter: {
+                    fn: ({ filterValue, value }) => {
+                        if (!filterValue || filterValue.length === 0)
+                            return true; // No filter, show all
+                        return filterValue.some((id: string) =>
+                            value.includes(id),
+                        );
+                    },
                 },
             },
         }),
@@ -202,15 +225,22 @@
             accessor: "groups",
             header: "Groups",
             cell: ({ value }) => {
-                return createRender(TableGroups, { id: value });
+                return createRender(TableGroups, {
+                    id: value,
+                    selected: groupFilter,
+                });
             },
             plugins: {
                 sort: {
                     disable: true,
                 },
                 colFilter: {
-                    fn: ({ filterValue, value }): boolean => {
-                        return value ? value.includes(filterValue) : false;
+                    fn: ({ filterValue, value }) => {
+                        if (!filterValue || filterValue.length === 0)
+                            return true; // No filter, show all
+                        return filterValue.some((id: string) =>
+                            value.includes(id),
+                        );
                     },
                 },
             },
@@ -377,6 +407,9 @@
     let { filterValues } = pluginStates.colFilter;
     let { hiddenColumnIds } = pluginStates.hide;
 
+    $: $filterValues.groups = $groupFilter.map((g) => g.id);
+    $: $filterValues.tags = $tagFilter.map((t) => t.id);
+
     let hideForId = Object.fromEntries(
         flatColumns.map((col) => col.id).map((id) => [id, true]),
     );
@@ -384,6 +417,14 @@
     $: $hiddenColumnIds = Object.entries(hideForId)
         .filter(([, hide]) => !hide)
         .map(([id]) => id);
+
+    $: $pageSize = parseInt(
+        localStorage.getItem(LIMIT_SK) ?? $pageSize.toString(),
+    );
+    const setPageSize = (size: number) => {
+        $pageSize = size;
+        localStorage.setItem(LIMIT_SK, size.toString());
+    };
 
     onMount(() => {
         switch (collection) {
@@ -481,12 +522,43 @@
 </script>
 
 <div class="flex items-center py-4">
-    <Input
-        class="max-w-sm"
-        placeholder="Search..."
-        type="text"
-        bind:value={$filterValue}
-    />
+    <div class="grid grid-flow-col items-center gap-2">
+        <Input placeholder="Search..." type="text" bind:value={$filterValue} />
+        {#if $groupFilter.length > 0}
+            <div class="flex items-center gap-1">
+                {#each $groupFilter as g}
+                    <button
+                        on:click={() =>
+                            ($groupFilter = $groupFilter.filter(
+                                (g) => g.id !== g.id,
+                            ))}
+                    >
+                        <Badge variant="secondary">
+                            group: {g.name}
+                        </Badge>
+                    </button>
+                {/each}
+            </div>
+        {/if}
+
+        {#if $tagFilter.length > 0}
+            <div class="flex items-center gap-1">
+                {#each $tagFilter as t}
+                    <button
+                        on:click={() =>
+                            ($tagFilter = $tagFilter.filter(
+                                (t) => t.id !== t.id,
+                            ))}
+                    >
+                        <Badge variant="secondary">
+                            tag: {t.name}
+                        </Badge>
+                    </button>
+                {/each}
+            </div>
+        {/if}
+    </div>
+
     <DropdownMenu.Root closeOnItemClick={false}>
         <DropdownMenu.Trigger asChild let:builder>
             <Button variant="outline" class="ml-auto" builders={[builder]}>
@@ -564,7 +636,7 @@
 <div class="flex items-center justify-between py-4">
     <Select.Root
         selected={{ value: $pageSize, label: $pageSize.toString() }}
-        onSelectedChange={(e) => e && ($pageSize = e.value)}
+        onSelectedChange={(e) => e && setPageSize(e.value)}
     >
         <Select.Trigger class="w-[180px]">
             <Select.Value placeholder="Limit" />

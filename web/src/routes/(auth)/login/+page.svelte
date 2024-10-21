@@ -144,7 +144,7 @@
 								class="w-full"
 								on:click={() => loginOauth(provider)}
 							>
-								{provider.name}
+								{provider.displayName ?? provider.name}
 							</Button>
 						{/each}
 					{/if}

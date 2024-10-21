@@ -64,6 +64,12 @@ test:
 release:
 	goreleaser release --clean
 
+.PHONY: test-db
+test-db:
+	go run test/cmd/mock.go
+	rm -rf pb_data
+	mv test_pb_data pb_data
+
 .PHONY: snapshot
 snapshot:
 	goreleaser release --snapshot --clean

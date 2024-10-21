@@ -4,7 +4,15 @@
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import type { RecordModel } from "pocketbase";
-    import { Bell, Bomb, Server, Users, X, SquarePlus } from "lucide-svelte";
+    import {
+        Send,
+        Bomb,
+        Server,
+        Users,
+        X,
+        SquarePlus,
+        Mail,
+    } from "lucide-svelte";
     import { toast } from "svelte-sonner";
 
     const deleteRequest = async (request: RecordModel) => {
@@ -48,7 +56,7 @@
                 size="icon"
                 class="h-8 w-8 rounded-full relative"
             >
-                <Bell size="1rem" />
+                <Send size="1rem" />
                 <span class="absolute -top-1 -right-1 text-xs text-gray-500">
                     {$requests.length}
                 </span>
@@ -123,7 +131,7 @@
         size="icon"
         class="h-8 w-8 rounded-full relative"
     >
-        <Bell size="1rem" />
+        <Mail size="1rem" />
         <span class="absolute -top-1 -right-1 text-xs text-gray-500">
             {$requests.length}
         </span>

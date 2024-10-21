@@ -11,6 +11,7 @@
 	import * as Card from "$lib/components/ui/card/index.js";
 	import { Button } from "$lib/components/ui/button/index.js";
 	import { User, Server, Users, Lock, Tag, Cloud } from "lucide-svelte";
+	import { toast } from "svelte-sonner";
 
 	$: stats = [
 		{
@@ -51,14 +52,14 @@
 		},
 	];
 
-	// const installAgents = async () => {
-	// 	await pb.send("/api/sync/agents", { method: "POST" });
-	// 	showToast(toastStore, "Reinstalling agents...", "warning");
-	// };
-	// const syncProviders = async () => {
-	// 	await pb.send("/api/sync/providers", { method: "POST" });
-	// 	showToast(toastStore, "Syncing providers...", "warning");
-	// };
+	const installAgents = async () => {
+		await pb.send("/api/sync/agents", { method: "POST" });
+		toast.warning("Installing agents...");
+	};
+	const syncProviders = async () => {
+		await pb.send("/api/sync/providers", { method: "POST" });
+		toast.warning("Syncing providers...");
+	};
 </script>
 
 <div class="px-4 py-6">
@@ -79,8 +80,26 @@
 						size="1.1rem"
 					/>
 				</Card.Header>
-				<Card.Content>
+				<Card.Content class="flex flex-row items-start justify-between">
 					<div class="text-2xl font-bold">{stat.count}</div>
+					{#if stat.title === "Machines"}
+						<Button
+							variant="secondary"
+							class="h-8 rounded-full hover:bg-transparent"
+							on:click={installAgents}
+						>
+							Sync Agents
+						</Button>
+					{/if}
+					{#if stat.title === "Providers"}
+						<Button
+							variant="secondary"
+							class="h-8 rounded-full hover:bg-transparent"
+							on:click={syncProviders}
+						>
+							Sync Providers
+						</Button>
+					{/if}
 				</Card.Content>
 			</Card.Root>
 		{/each}

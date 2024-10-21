@@ -8,7 +8,7 @@
     import SignUserKey from "$lib/modals/SignUserKey.svelte";
     import { baseRoutes } from "$lib/navigation/Routes";
     import { page } from "$app/stores";
-    import { Database, Fingerprint } from "lucide-svelte";
+    import { Database, KeyRound } from "lucide-svelte";
 
     $: active = $page.url.pathname.split("/")[1];
     let open = false;
@@ -83,7 +83,7 @@
                 on:click={() => (open = true)}
                 class="h-8 w-8 rounded-full"
             >
-                <Fingerprint size="1rem" />
+                <KeyRound size="1rem" />
             </Button>
             <Requests />
             <Profile />
