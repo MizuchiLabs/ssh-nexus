@@ -50,6 +50,8 @@
         </Avatar.Root>
     </DropdownMenu.Trigger>
     <DropdownMenu.Content>
+        <DropdownMenu.Label>My Account</DropdownMenu.Label>
+        <DropdownMenu.Separator />
         <DropdownMenu.Group>
             <DropdownMenu.Item
                 href="/profile"

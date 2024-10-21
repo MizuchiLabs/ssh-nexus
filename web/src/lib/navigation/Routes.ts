@@ -6,12 +6,12 @@ export interface Route {
 }
 
 export const baseRoutes: Route[] = [
-  // {
-  //   name: "Home",
-  //   path: "/",
-  //   icon: "fa6-solid:house",
-  //   admin: false,
-  // },
+  {
+    name: "Home",
+    path: "/",
+    icon: "fa6-solid:house",
+    admin: false,
+  },
   {
     name: "Machines",
     path: "/machines",

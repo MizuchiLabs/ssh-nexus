@@ -52,13 +52,16 @@
 	{#if $loggedIn}
 		<Navbar />
 
-		<main use:autoAnimate={{ duration: 100 }} class="mb-auto">
+		<main class="mb-auto px-6 py-4" use:autoAnimate={{ duration: 100 }}>
 			<slot />
 		</main>
 
 		<Footer />
 	{:else}
-		<div class="flex h-screen flex-col items-center justify-center">
+		<div
+			class="flex h-screen flex-col items-center justify-center"
+			use:autoAnimate={{ duration: 100 }}
+		>
 			<slot />
 		</div>
 	{/if}

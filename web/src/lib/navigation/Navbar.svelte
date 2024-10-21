@@ -20,8 +20,7 @@
 
 <nav class="flex h-16 items-center justify-between border-b bg-surface-500/5">
     <div class="ml-4 flex flex-row items-center">
-        <!-- TODO: Redirect to dashboard -->
-        <a href="/machines" class="hidden md:block" tabindex="-1">
+        <a href="/" class="hidden md:block" tabindex="-1">
             <img
                 src={logo}
                 alt="logo"

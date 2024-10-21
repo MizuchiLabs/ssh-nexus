@@ -30,7 +30,7 @@
 		}
 		toast.success("Login successful");
 		loggedIn.set(true);
-		goto("/machines"); // TODO: Redirect to dashboard
+		goto("/");
 	};
 	const resetPassword = async () => {
 		if (!username) return;
