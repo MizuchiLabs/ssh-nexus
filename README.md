@@ -67,11 +67,13 @@ Your one-stop solution for managing SSH access with ease and security. This appl
    - **PB_ENCRYPTION_KEY**: The encryption key for the sqlite3 database.
 1. **Running the server**:
    ```bash
-   ./nexus serve
+   nexus serve
+   # or 
+   PB_ADMIN_PASSWORD="password" PB_ENCRYPTION_KEY="some-random-key" nexus serve
    ```
 1. **Running the agent** on a machine:
    ```bash
-   ./nexus-agent --server <your-server-address>
+   nexus-agent --server <your-server-address>
    ```
 
 #### Method 2: Docker
