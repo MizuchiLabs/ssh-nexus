@@ -8,6 +8,9 @@ main() {
 	binary="nexus"
 	if [ "${1:-}" = "agent" ]; then
 		binary="nexus-agent"
+	elif [ "${1:-}" = "uninstall" ]; then
+		uninstall
+		exit 0
 	fi
 	platform="$(uname -s)"
 	arch="$(uname -m)"
@@ -75,6 +78,19 @@ main() {
 		esac
 
 		echo "To run $binary now, '~/.local/bin/$binary'"
+	fi
+}
+
+uninstall() {
+	binary="nexus"
+	[ "$(which nexus-agent 2>/dev/null)" ] && binary="nexus-agent"
+	bin_path="$HOME/.local/bin/$binary"
+	if [ -f "$bin_path" ]; then
+		echo "Uninstalling $binary..."
+		rm -f "$bin_path"
+		echo "$binary has been removed from $HOME/.local/bin."
+	else
+		echo "$binary is not installed."
 	fi
 }
 

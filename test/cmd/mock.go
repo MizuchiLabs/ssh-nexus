@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"syscall"
 	"time"
 
@@ -90,7 +91,7 @@ func generateMockData(
 		case "groups":
 			record.Set("name", gofakeit.JobLevel()+gofakeit.UUID()[:8])
 			record.Set("description", gofakeit.Sentence(10))
-			record.Set("linux_username", gofakeit.Username())
+			record.Set("linux_username", strings.ToLower(gofakeit.Username()))
 		case "tags":
 			record.Set("name", gofakeit.Gamertag())
 			record.Set("description", gofakeit.Sentence(10))
